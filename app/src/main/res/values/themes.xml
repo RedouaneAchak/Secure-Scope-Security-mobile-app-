@@ -2,4 +2,9 @@
 <resources>
 
     <style name="Theme.SecureScope" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.SecureScope.splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.SecureScope</item>
+    </style>
 </resources>
