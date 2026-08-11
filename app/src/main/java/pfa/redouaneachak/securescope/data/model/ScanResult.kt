@@ -8,5 +8,6 @@ data class ScanResult(
     val malwareNames: List<String>,
     val vulnerabilitiesFound: Int,
     val riskScore: RiskScore,
-    val scanTimestamp: Long
+    val scanTimestamp: Long,
+    val cloudVerified: Boolean
 )

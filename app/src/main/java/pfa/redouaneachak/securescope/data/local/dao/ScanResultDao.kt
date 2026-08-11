@@ -22,7 +22,7 @@ interface ScanResultDao {
     fun getScanHistoryForApp(packageName: String): Flow<List<ScanResultEntity>>
 
     @Insert
-    suspend fun insertScanResult(result: ScanResultEntity)
+    suspend fun insertScanResult(result: ScanResultEntity): Long
 
     @Insert
     suspend fun insertScanResults(results: List<ScanResultEntity>)
