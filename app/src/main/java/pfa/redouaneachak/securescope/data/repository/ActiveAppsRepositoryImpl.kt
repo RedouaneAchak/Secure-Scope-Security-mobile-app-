@@ -1,14 +1,13 @@
 package pfa.redouaneachak.securescope.data.repository
 
 import android.app.AppOpsManager
-import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.os.Process
 import android.provider.Settings
 import dagger.hilt.android.qualifiers.ApplicationContext
-import pfa.redouaneachak.securescope.data.model.ForegroundAppInfo
+import pfa.redouaneachak.securescope.data.model.RecentAppInfo
 import javax.inject.Inject
 
 class ActiveAppsRepositoryImpl @Inject constructor(
@@ -34,30 +33,27 @@ class ActiveAppsRepositoryImpl @Inject constructor(
         context.startActivity(intent)
     }
 
-    override suspend fun getCurrentForegroundApp(): ForegroundAppInfo? {
-        if (!hasUsageAccessPermission()) return null
+    override suspend fun getRecentlyUsedApps(limit: Int): List<RecentAppInfo> {
+        if (!hasUsageAccessPermission()) return emptyList()
 
         val endTime = System.currentTimeMillis()
-        val startTime = endTime - TEN_MINUTES_MS
+        val startTime = endTime - ONE_WEEK_MS
 
-        val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
-        val event = UsageEvents.Event()
+        val usageStatsList = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_BEST,
+            startTime,
+            endTime
+        )
 
-        var latestPackage: String? = null
-        var latestTimestamp = 0L
-
-        while (usageEvents.hasNextEvent()) {
-            usageEvents.getNextEvent(event)
-            if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND && event.timeStamp >= latestTimestamp) {
-                latestTimestamp = event.timeStamp
-                latestPackage = event.packageName
-            }
-        }
-
-        return latestPackage?.let { ForegroundAppInfo(it, latestTimestamp) }
+        return usageStatsList
+            .filter { it.lastTimeUsed > 0 }
+            .sortedByDescending { it.lastTimeUsed }
+            .distinctBy { it.packageName }
+            .take(limit)
+            .map { RecentAppInfo(it.packageName, it.lastTimeUsed) }
     }
 
     companion object {
-        private const val TEN_MINUTES_MS = 10 * 60 * 1000L
+        private const val ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000L
     }
 }

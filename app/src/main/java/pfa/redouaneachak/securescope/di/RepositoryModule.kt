@@ -14,6 +14,8 @@ import pfa.redouaneachak.securescope.data.repository.NetworkMonitorRepository
 import pfa.redouaneachak.securescope.data.repository.NetworkMonitorRepositoryImpl
 import pfa.redouaneachak.securescope.data.repository.SecurityScanRepository
 import pfa.redouaneachak.securescope.data.repository.SecurityScanRepositoryImpl
+import pfa.redouaneachak.securescope.data.repository.SettingsRepository
+import pfa.redouaneachak.securescope.data.repository.SettingsRepositoryImpl
 import javax.inject.Singleton
 
 @Module
@@ -39,4 +41,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindActiveAppsRepository(impl: ActiveAppsRepositoryImpl): ActiveAppsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
 }

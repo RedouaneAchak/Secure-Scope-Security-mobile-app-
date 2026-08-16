@@ -29,6 +29,7 @@ class AppRepositoryImpl @Inject constructor(
             packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
         }
         return packages.mapNotNull { it.toDomainModel() }
+            .sortedBy { it.appName.lowercase() }
     }
 
     override suspend fun getAppByPackageName(packageName: String): AppInfo? {
