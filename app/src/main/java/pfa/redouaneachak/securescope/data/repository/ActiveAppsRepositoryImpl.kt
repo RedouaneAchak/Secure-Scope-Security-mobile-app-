@@ -7,6 +7,8 @@ import android.content.Intent
 import android.os.Process
 import android.provider.Settings
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import pfa.redouaneachak.securescope.data.model.RecentAppInfo
 import javax.inject.Inject
 
@@ -33,8 +35,8 @@ class ActiveAppsRepositoryImpl @Inject constructor(
         context.startActivity(intent)
     }
 
-    override suspend fun getRecentlyUsedApps(limit: Int): List<RecentAppInfo> {
-        if (!hasUsageAccessPermission()) return emptyList()
+    override suspend fun getRecentlyUsedApps(limit: Int): List<RecentAppInfo> = withContext(Dispatchers.IO) {
+        if (!hasUsageAccessPermission()) return@withContext emptyList()
 
         val endTime = System.currentTimeMillis()
         val startTime = endTime - ONE_WEEK_MS
@@ -45,7 +47,7 @@ class ActiveAppsRepositoryImpl @Inject constructor(
             endTime
         )
 
-        return usageStatsList
+        return@withContext usageStatsList
             .filter { it.lastTimeUsed > 0 }
             .sortedByDescending { it.lastTimeUsed }
             .distinctBy { it.packageName }

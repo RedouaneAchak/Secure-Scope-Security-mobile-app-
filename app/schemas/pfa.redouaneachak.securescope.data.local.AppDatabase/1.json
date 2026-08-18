@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "5c448b800d60bb909a4d1d68e7b4688b",
+    "identityHash": "56e73eb5521b372917f14d0952e44b4f",
     "entities": [
       {
         "tableName": "scan_results",
@@ -83,7 +83,7 @@
       },
       {
         "tableName": "network_sessions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `packageName` TEXT NOT NULL, `remoteAddress` TEXT NOT NULL, `remotePort` INTEGER NOT NULL, `bytesSent` INTEGER NOT NULL, `bytesReceived` INTEGER NOT NULL, `sessionStartTimestamp` INTEGER NOT NULL, `sessionEndTimestamp` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `packageName` TEXT NOT NULL, `remoteAddress` TEXT NOT NULL, `timestamp` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -104,33 +104,10 @@
             "notNull": true
           },
           {
-            "fieldPath": "remotePort",
-            "columnName": "remotePort",
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "bytesSent",
-            "columnName": "bytesSent",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "bytesReceived",
-            "columnName": "bytesReceived",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sessionStartTimestamp",
-            "columnName": "sessionStartTimestamp",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sessionEndTimestamp",
-            "columnName": "sessionEndTimestamp",
-            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -235,7 +212,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5c448b800d60bb909a4d1d68e7b4688b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '56e73eb5521b372917f14d0952e44b4f')"
     ]
   }
 }

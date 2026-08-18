@@ -5,8 +5,10 @@ import android.app.usage.NetworkStatsManager
 import android.content.Context
 import android.net.ConnectivityManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import pfa.redouaneachak.securescope.data.local.dao.NetworkSessionDao
 import pfa.redouaneachak.securescope.data.local.entity.NetworkSessionEntity
 import pfa.redouaneachak.securescope.data.model.AppDataUsage
@@ -39,7 +41,7 @@ class NetworkMonitorRepositoryImpl @Inject constructor(
     }
 
     @Suppress("DEPRECATION")
-    override suspend fun getDataUsageForAllApps(): List<AppDataUsage> {
+    override suspend fun getDataUsageForAllApps(): List<AppDataUsage> = withContext(Dispatchers.IO) {
         val networkStatsManager = context.getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
         val packageManager = context.packageManager
         val usageByUid = mutableMapOf<Int, Pair<Long, Long>>()
@@ -59,7 +61,7 @@ class NetworkMonitorRepositoryImpl @Inject constructor(
             }
         }
 
-        return usageByUid.mapNotNull { (uid, usage) ->
+        return@withContext usageByUid.mapNotNull { (uid, usage) ->
             val packageName = packageManager.getPackagesForUid(uid)?.firstOrNull() ?: return@mapNotNull null
             AppDataUsage(packageName, totalSentBytes = usage.second, totalReceivedBytes = usage.first)
         }

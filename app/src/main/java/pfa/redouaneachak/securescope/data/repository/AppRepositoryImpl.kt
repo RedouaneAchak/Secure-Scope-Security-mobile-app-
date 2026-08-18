@@ -12,14 +12,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import pfa.redouaneachak.securescope.data.model.AppInfo
 import pfa.redouaneachak.securescope.data.model.PermissionInfo
 import javax.inject.Inject
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 class AppRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : AppRepository {
 
     private val packageManager: PackageManager = context.packageManager
 
-    override suspend fun getInstalledApps(): List<AppInfo> {
+    override suspend fun getInstalledApps(): List<AppInfo> = withContext(Dispatchers.IO) {
         val packages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             packageManager.getInstalledApplications(
                 PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
@@ -28,12 +29,11 @@ class AppRepositoryImpl @Inject constructor(
             @Suppress("DEPRECATION")
             packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
         }
-        return packages.mapNotNull { it.toDomainModel() }
-            .sortedBy { it.appName.lowercase() }
+        packages.mapNotNull { it.toDomainModel() }.sortedBy { it.appName.lowercase() }
     }
 
-    override suspend fun getAppByPackageName(packageName: String): AppInfo? {
-        return try {
+    override suspend fun getAppByPackageName(packageName: String): AppInfo? = withContext(Dispatchers.IO) {
+        try {
             val appInfo = packageManager.getApplicationInfo(packageName, 0)
             appInfo.toDomainModel()
         } catch (_: PackageManager.NameNotFoundException) {
@@ -41,7 +41,7 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getPermissionsForApp(packageName: String): List<PermissionInfo> {
+    override suspend fun getPermissionsForApp(packageName: String): List<PermissionInfo> = withContext(Dispatchers.IO) {
         val packageInfo = try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 packageManager.getPackageInfo(
@@ -53,13 +53,13 @@ class AppRepositoryImpl @Inject constructor(
                 packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
             }
         } catch (_: PackageManager.NameNotFoundException) {
-            return emptyList()
+            return@withContext emptyList()
         }
 
-        val requestedPermissions = packageInfo.requestedPermissions ?: return emptyList()
+        val requestedPermissions = packageInfo.requestedPermissions ?: return@withContext emptyList()
         val grantedFlags = packageInfo.requestedPermissionsFlags
 
-        return requestedPermissions.mapIndexedNotNull { index, permissionName ->
+        return@withContext requestedPermissions.mapIndexedNotNull { index, permissionName ->
             val flagValue = grantedFlags?.getOrNull(index) ?: 0
             val isGranted = (flagValue and PackageInfo.REQUESTED_PERMISSION_GRANTED) != 0
 

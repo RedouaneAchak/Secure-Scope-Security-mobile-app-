@@ -22,6 +22,7 @@ workmanager = "2.11.2"
 hiltWork = "1.4.0"
 mpandroidchart = "3.1.0"
 mockito = "5.23.0"
+foundation = "1.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -76,6 +77,10 @@ mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", versio
 
 # Testing
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+
+#ui
+material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
