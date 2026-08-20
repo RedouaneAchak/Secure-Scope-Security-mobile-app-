@@ -41,14 +41,17 @@ class NetworkMonitorRepositoryImpl @Inject constructor(
     }
 
     @Suppress("DEPRECATION")
-    override suspend fun getDataUsageForAllApps(): List<AppDataUsage> = withContext(Dispatchers.IO) {
+    override suspend fun getDataUsageForAllApps(sinceMillis: Long?): List<AppDataUsage> = withContext(Dispatchers.IO) {
         val networkStatsManager = context.getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
         val packageManager = context.packageManager
         val usageByUid = mutableMapOf<Int, Pair<Long, Long>>()
 
+        val endTime = System.currentTimeMillis()
+        val startTime = if (sinceMillis != null) endTime - sinceMillis else 0L
+
         for (networkType in listOf(ConnectivityManager.TYPE_WIFI, ConnectivityManager.TYPE_MOBILE)) {
             try {
-                val stats = networkStatsManager.querySummary(networkType, null, 0L, System.currentTimeMillis())
+                val stats = networkStatsManager.querySummary(networkType, null, startTime, endTime)
                 val bucket = NetworkStats.Bucket()
                 while (stats.hasNextBucket()) {
                     stats.getNextBucket(bucket)
@@ -56,12 +59,10 @@ class NetworkMonitorRepositoryImpl @Inject constructor(
                     usageByUid[bucket.uid] = (previous.first + bucket.rxBytes) to (previous.second + bucket.txBytes)
                 }
                 stats.close()
-            } catch (_: Exception) {
-                // this network type unavailable on this device, or usage access not yet granted
-            }
+            } catch (_: Exception) { }
         }
 
-        return@withContext usageByUid.mapNotNull { (uid, usage) ->
+        usageByUid.mapNotNull { (uid, usage) ->
             val packageName = packageManager.getPackagesForUid(uid)?.firstOrNull() ?: return@mapNotNull null
             AppDataUsage(packageName, totalSentBytes = usage.second, totalReceivedBytes = usage.first)
         }

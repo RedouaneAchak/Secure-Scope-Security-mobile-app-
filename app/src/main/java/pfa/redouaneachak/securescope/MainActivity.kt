@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
-import pfa.redouaneachak.securescope.ui.screens.home.HomeScreen
+import pfa.redouaneachak.securescope.ui.SecureScopeRoot
 import pfa.redouaneachak.securescope.ui.theme.SecureScopeTheme
 import pfa.redouaneachak.securescope.ui.screens.splash.SplashScreen
 
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     if (showSplash) {
                         SplashScreen(onFinished = { showSplash = false })
                     } else {
-                        HomeScreen()
+                        SecureScopeRoot()
                     }
                 }
             }

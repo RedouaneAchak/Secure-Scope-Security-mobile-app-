@@ -8,5 +8,6 @@ data class HomeUiState(
     val installedAppsCount: Int = 0,
     val totalDataSentBytes: Long = 0,
     val totalDataReceivedBytes: Long = 0,
-    val hasUsageAccessPermission: Boolean = false
+    val hasUsageAccessPermission: Boolean = false,
+    val lastScanTimestamp: Long? = null
 )
