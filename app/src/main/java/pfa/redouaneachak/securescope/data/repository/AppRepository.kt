@@ -7,6 +7,7 @@ interface AppRepository {
     suspend fun getInstalledApps(): List<AppInfo>
     suspend fun getAppByPackageName(packageName: String): AppInfo?
     suspend fun getPermissionsForApp(packageName: String): List<PermissionInfo>
+    suspend fun getInstallSource(packageName: String): String
     suspend fun uninstallApp(packageName: String)
     suspend fun forceStopApp(packageName: String)
     suspend fun revokePermission(packageName: String, permissionName: String)

@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import pfa.redouaneachak.securescope.data.model.AppLanguage
 import pfa.redouaneachak.securescope.data.model.AppTheme
 
 @Composable
@@ -26,7 +25,6 @@ fun SettingsScreen(
     onNavigateToUserAgreement: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val language by viewModel.language.collectAsStateWithLifecycle()
     val theme by viewModel.theme.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -34,7 +32,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Column(verticalArrangement = Arrangement.spacedBy(28.dp)) {
-            LanguageRow(selected = language, onSelect = viewModel::setLanguage)
+
 
             SettingsToggleRow(
                 label = "Dark mode",
@@ -56,31 +54,13 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier = Modifier.fillMaxWidth().padding(bottom = 15.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("SECURE SCOPE", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("Powered by Inovext", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
-@Composable
-private fun LanguageRow(selected: AppLanguage, onSelect: (AppLanguage) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Text("Language", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        Box {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { expanded = true }) {
-                Text(if (selected == AppLanguage.ENGLISH) "En" else "Fr", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-            }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                DropdownMenuItem(text = { Text("English") }, onClick = { onSelect(AppLanguage.ENGLISH); expanded = false })
-                DropdownMenuItem(text = { Text("Français") }, onClick = { onSelect(AppLanguage.FRENCH); expanded = false })
-            }
-        }
-    }
-}
 
 @Composable
 private fun SettingsToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {

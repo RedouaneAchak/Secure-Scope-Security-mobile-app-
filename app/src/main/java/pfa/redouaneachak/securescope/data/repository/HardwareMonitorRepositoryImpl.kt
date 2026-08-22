@@ -13,6 +13,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import pfa.redouaneachak.securescope.data.model.HardwareStats
 import javax.inject.Inject
+import android.app.usage.StorageStatsManager
+import android.os.storage.StorageManager
+import android.provider.MediaStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import pfa.redouaneachak.securescope.data.model.AppStorageUsage
+import pfa.redouaneachak.securescope.data.model.StorageBreakdown
+import pfa.redouaneachak.securescope.data.model.StorageCategoryUsage
 
 class HardwareMonitorRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
@@ -49,5 +57,52 @@ class HardwareMonitorRepositoryImpl @Inject constructor(
             storageUsedGb = usedBytes / (1024f * 1024f * 1024f),
             storageTotalGb = totalBytes / (1024f * 1024f * 1024f)
         )
+    }
+    @Suppress("DEPRECATION")
+    override suspend fun getStorageBreakdown(): StorageBreakdown = withContext(Dispatchers.IO) {
+        val storageStatsManager = context.getSystemService(StorageStatsManager::class.java)
+        val storageManager = context.getSystemService(StorageManager::class.java)
+        val uuid = StorageManager.UUID_DEFAULT
+
+        val externalStats = storageStatsManager.queryExternalStatsForUser(uuid, android.os.Process.myUserHandle())
+
+        val apps = context.packageManager.getInstalledApplications(0)
+        val appUsages = mutableListOf<AppStorageUsage>()
+        var appsTotalBytes = 0L
+
+        for (appInfo in apps) {
+            try {
+                val stats = storageStatsManager.queryStatsForUid(uuid, appInfo.uid)
+                val size = stats.appBytes + stats.dataBytes + stats.cacheBytes
+                appsTotalBytes += size
+                appUsages.add(
+                    AppStorageUsage(
+                        packageName = appInfo.packageName,
+                        appName = context.packageManager.getApplicationLabel(appInfo).toString(),
+                        bytes = size
+                    )
+                )
+            } catch (_: Exception) { }
+        }
+
+        StorageBreakdown(
+            categories = listOf(
+                StorageCategoryUsage("Apps", appsTotalBytes),
+                StorageCategoryUsage("Images", externalStats.imageBytes),
+                StorageCategoryUsage("Audio", externalStats.audioBytes),
+                StorageCategoryUsage("Video", externalStats.videoBytes),
+                StorageCategoryUsage("Other", externalStats.totalBytes - externalStats.imageBytes - externalStats.audioBytes - externalStats.videoBytes)
+            ),
+            appUsages = appUsages.sortedByDescending { it.bytes }
+        )
+    }
+
+    private fun queryMediaStoreSize(uri: android.net.Uri): Long {
+        var total = 0L
+        context.contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.SIZE), null, null, null)?.use { cursor ->
+            val sizeIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
+            while (cursor.moveToNext()) total += cursor.getLong(sizeIndex)
+        }
+        return total
     }
 }

@@ -77,9 +77,34 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getInstallSource(packageName: String): String = withContext(Dispatchers.IO) {
+        val installerPackage = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                packageManager.getInstallSourceInfo(packageName).installingPackageName
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getInstallerPackageName(packageName)
+            }
+        } catch (_: Exception) {
+            null
+        }
+
+        when (installerPackage) {
+            null -> "Unknown / Sideloaded"
+            "com.android.vending" -> "Google Play Store"
+            else -> try {
+                val installerAppInfo = packageManager.getApplicationInfo(installerPackage, 0)
+                packageManager.getApplicationLabel(installerAppInfo).toString()
+            } catch (_: Exception) {
+                installerPackage
+            }
+        }
+    }
+
     override suspend fun uninstallApp(packageName: String) {
         val intent = Intent(Intent.ACTION_DELETE).apply {
             data = "package:$packageName".toUri()
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
     }

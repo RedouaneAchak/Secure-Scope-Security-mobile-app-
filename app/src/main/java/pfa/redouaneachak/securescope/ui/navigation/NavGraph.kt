@@ -7,9 +7,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import pfa.redouaneachak.securescope.ui.screens.appdetail.AppDetailScreen
+import pfa.redouaneachak.securescope.ui.screens.applist.AppListScreen
 import pfa.redouaneachak.securescope.ui.screens.common.PlaceholderScreen
 import pfa.redouaneachak.securescope.ui.screens.datausage.DataUsageScreen
+import pfa.redouaneachak.securescope.ui.screens.hardware.HardwareScreen
 import pfa.redouaneachak.securescope.ui.screens.home.HomeScreen
+import pfa.redouaneachak.securescope.ui.screens.recentapps.RecentAppsScreen
+import pfa.redouaneachak.securescope.ui.screens.scan.ScanScreen
 
 @Composable
 fun SecureScopeNavGraph(
@@ -26,6 +31,7 @@ fun SecureScopeNavGraph(
                 onNavigateToHardware = { navController.navigate(Screen.Hardware.route) },
                 onNavigateToRecentApps = { navController.navigate(Screen.RecentApps.route) },
                 onNavigateToAppList = { navController.navigate(Screen.AppList.route) },
+                onNavigateToAppDetail = { packageName -> navController.navigate(Screen.AppDetail.createRoute(packageName)) },
                 onOpenMenu = onOpenMenu
             )
         }
@@ -34,20 +40,36 @@ fun SecureScopeNavGraph(
             DataUsageScreen(onBack = { navController.popBackStack() })
         }
 
-        composable(Screen.AppList.route) { PlaceholderScreen("Installed Apps") { navController.popBackStack() } }
-        composable(Screen.Scan.route) { PlaceholderScreen("Scan Apps") { navController.popBackStack() } }
+        composable(Screen.AppList.route) {
+            AppListScreen(
+                onBack = { navController.popBackStack() },
+                onAppClick = { packageName -> navController.navigate(Screen.AppDetail.createRoute(packageName)) }
+            )
+        }
+        composable(Screen.Scan.route) {
+            ScanScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToAppDetail = { pkg -> navController.navigate(Screen.AppDetail.createRoute(pkg)) }
+            )
+        }
+        composable(Screen.Hardware.route) {
+            HardwareScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.RecentApps.route) {
+            RecentAppsScreen(
+                onBack = { navController.popBackStack() },
+                onAppClick = { pkg -> navController.navigate(Screen.AppDetail.createRoute(pkg)) }
+            )
+        }
         composable(Screen.NetworkScan.route) { PlaceholderScreen("Scan Network") { navController.popBackStack() } }
-        composable(Screen.Hardware.route) { PlaceholderScreen("Hardware Monitoring") { navController.popBackStack() } }
-        composable(Screen.RecentApps.route) { PlaceholderScreen("Recent Apps") { navController.popBackStack() } }
         composable(Screen.Guide.route) { PlaceholderScreen("App Guide") { navController.popBackStack() } }
         composable(Screen.UserAgreement.route) { PlaceholderScreen("User Agreement") { navController.popBackStack() } }
 
         composable(
             route = Screen.AppDetail.route,
             arguments = listOf(navArgument("packageName") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val packageName = backStackEntry.arguments?.getString("packageName") ?: ""
-            PlaceholderScreen("App Detail: $packageName") { navController.popBackStack() }
+        ) {
+            AppDetailScreen(onBack = { navController.popBackStack() })
         }
     }
 }

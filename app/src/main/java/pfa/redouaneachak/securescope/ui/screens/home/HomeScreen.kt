@@ -47,6 +47,7 @@ fun HomeScreen(
     onNavigateToHardware: () -> Unit = {},
     onNavigateToRecentApps: () -> Unit = {},
     onNavigateToAppList: () -> Unit = {},
+    onNavigateToAppDetail: (String) -> Unit = {},
     onOpenMenu: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -99,8 +100,9 @@ fun HomeScreen(
             AppGridPreview(
                 apps = uiState.installedAppsPreview,
                 totalCount = uiState.installedAppsCount,
-                isLoading = uiState.isLoading,
-                onMoreClick = onNavigateToAppList
+                isLoading = uiState.isLoadingApps,
+                onMoreClick = onNavigateToAppList,
+                onAppClick = onNavigateToAppDetail
             )
 
             HomeActionGrid(
@@ -218,7 +220,8 @@ private fun AppGridPreview(
     apps: List<AppInfo>,
     totalCount: Int,
     isLoading: Boolean,
-    onMoreClick: () -> Unit
+    onMoreClick: () -> Unit,
+    onAppClick: (String) -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -241,7 +244,7 @@ private fun AppGridPreview(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     userScrollEnabled = false
                 ) {
-                    items(visibleApps) { app -> AppIconTile(app) }
+                    items(visibleApps) { app -> AppIconTile(app, onClick = { onAppClick(app.packageName) }) }
                     item { MoreTile(onClick = onMoreClick) }
                 }
             }
@@ -249,9 +252,12 @@ private fun AppGridPreview(
     }
 }
 @Composable
-private fun AppIconTile(app: AppInfo) {
+private fun AppIconTile(app: AppInfo, onClick: () -> Unit) {
     val bitmap = remember(app.packageName) { app.icon.toBitmap().asImageBitmap() }
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(56.dp)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(56.dp).clickable(onClick = onClick)
+    ) {
         Image(bitmap = bitmap, contentDescription = app.appName, modifier = Modifier.size(30.dp))
         Spacer(modifier = Modifier.height(3.dp))
         Text(app.appName, fontSize = 9.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)

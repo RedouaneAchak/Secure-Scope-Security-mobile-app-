@@ -26,33 +26,52 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    init {
-        loadDashboard()
-    }
+    init { loadDashboard() }
 
     fun loadDashboard() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+        loadApps()
+        loadDataUsage()
+        loadLastScan()
+    }
 
+    private fun loadApps() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingApps = true) }
+            val apps = appRepository.getInstalledApps()
+                .filterNot { it.isSystemApp }
+                .sortedByDescending { it.installedTimestamp }
+            _uiState.update {
+                it.copy(
+                    isLoadingApps = false,
+                    installedAppsPreview = apps.take(PREVIEW_COUNT),
+                    installedAppsCount = apps.size
+                )
+            }
+        }
+    }
+
+    private fun loadDataUsage() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingDataUsage = true) }
             val hasPermission = activeAppsRepository.hasUsageAccessPermission()
-            val apps = appRepository.getInstalledApps().filterNot { it.isSystemApp }
             val dataUsage = if (hasPermission) {
                 networkMonitorRepository.getDataUsageForAllApps(sinceMillis = ONE_DAY_MS)
             } else emptyList()
-            val latestScans = securityScanRepository.getLatestScanResults().first()
-            val lastScan = latestScans.maxOfOrNull { it.scanTimestamp }
-
             _uiState.update {
                 it.copy(
-                    isLoading = false,
-                    installedAppsPreview = apps.take(PREVIEW_COUNT),
-                    installedAppsCount = apps.size,
-                    totalDataSentBytes = dataUsage.sumOf { usage -> usage.totalSentBytes },
-                    totalDataReceivedBytes = dataUsage.sumOf { usage -> usage.totalReceivedBytes },
+                    isLoadingDataUsage = false,
                     hasUsageAccessPermission = hasPermission,
-                    lastScanTimestamp = lastScan
+                    totalDataSentBytes = dataUsage.sumOf { u -> u.totalSentBytes },
+                    totalDataReceivedBytes = dataUsage.sumOf { u -> u.totalReceivedBytes }
                 )
             }
+        }
+    }
+
+    private fun loadLastScan() {
+        viewModelScope.launch {
+            val latestScans = securityScanRepository.getLatestScanResults().first()
+            _uiState.update { it.copy(lastScanTimestamp = latestScans.maxOfOrNull { s -> s.scanTimestamp }) }
         }
     }
 

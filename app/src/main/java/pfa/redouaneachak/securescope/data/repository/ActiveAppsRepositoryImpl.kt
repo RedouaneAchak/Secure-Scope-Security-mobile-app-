@@ -11,6 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import pfa.redouaneachak.securescope.data.model.RecentAppInfo
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.delay
+
 
 class ActiveAppsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
@@ -54,7 +58,12 @@ class ActiveAppsRepositoryImpl @Inject constructor(
             .take(limit)
             .map { RecentAppInfo(it.packageName, it.lastTimeUsed) }
     }
-
+    override fun observeRecentlyUsedApps(limit: Int): Flow<List<RecentAppInfo>> = flow {
+        while (true) {
+            emit(getRecentlyUsedApps(limit))
+            delay(30_000)
+        }
+    }
     companion object {
         private const val ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000L
     }

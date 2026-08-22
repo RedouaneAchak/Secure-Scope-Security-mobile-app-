@@ -11,11 +11,13 @@ import pfa.redouaneachak.securescope.data.local.entity.ScanResultEntity
 import pfa.redouaneachak.securescope.data.local.entity.TrackerEntity
 import pfa.redouaneachak.securescope.data.model.AppInfo
 import pfa.redouaneachak.securescope.data.model.RiskScore
+import pfa.redouaneachak.securescope.data.model.ScanProgress
 import pfa.redouaneachak.securescope.data.model.ScanResult
 import pfa.redouaneachak.securescope.data.model.TrackerInfo
 import pfa.redouaneachak.securescope.data.remote.VirusTotalApiService
 import pfa.redouaneachak.securescope.util.TrackerDetector
 import javax.inject.Inject
+import kotlinx.coroutines.flow.flow
 
 class SecurityScanRepositoryImpl @Inject constructor(
     private val appRepository: AppRepository,
@@ -38,11 +40,17 @@ class SecurityScanRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun scanAllApps(): List<ScanResult> {
-        val apps = appRepository.getInstalledApps()
-        return apps.map { scanSingleApp(it.packageName) }
-    }
+    override fun scanAllApps(): Flow<ScanProgress> = flow {
+        val apps = appRepository.getInstalledApps().filterNot { it.isSystemApp }
+        val results = mutableListOf<ScanResult>()
 
+        apps.forEachIndexed { index, app ->
+            emit(ScanProgress.InProgress(current = index + 1, total = apps.size, currentAppName = app.appName))
+            results.add(scanSingleApp(app.packageName))
+        }
+
+        emit(ScanProgress.Completed(results))
+    }
     override suspend fun scanSingleApp(packageName: String): ScanResult {
         val app = appRepository.getAppByPackageName(packageName) ?: error("App $packageName not found")
 
