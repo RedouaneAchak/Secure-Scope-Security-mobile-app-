@@ -56,7 +56,7 @@ fun SettingsScreen(
 
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 15.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("SECURE SCOPE", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Powered by Inovext", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Powered by INOVEXT", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

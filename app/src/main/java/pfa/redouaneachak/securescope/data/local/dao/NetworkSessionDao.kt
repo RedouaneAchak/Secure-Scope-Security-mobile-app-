@@ -12,8 +12,14 @@ interface NetworkSessionDao {
     @Query("SELECT * FROM network_sessions WHERE packageName = :packageName ORDER BY timestamp DESC")
     fun getSessionsForApp(packageName: String): Flow<List<NetworkSessionEntity>>
 
+    @Query("SELECT * FROM network_sessions ORDER BY timestamp DESC LIMIT :limit")
+    fun getRecentSessions(limit: Int): Flow<List<NetworkSessionEntity>>
+
     @Query("SELECT DISTINCT remoteAddress FROM network_sessions WHERE packageName = :packageName")
     suspend fun getContactedServers(packageName: String): List<String>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM network_sessions WHERE packageName = :packageName AND remoteAddress = :domain)")
+    suspend fun sessionExists(packageName: String, domain: String): Boolean
 
     @Insert
     suspend fun insertSession(session: NetworkSessionEntity)

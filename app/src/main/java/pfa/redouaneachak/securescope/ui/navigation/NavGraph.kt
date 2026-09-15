@@ -1,6 +1,7 @@
 package pfa.redouaneachak.securescope.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -13,14 +14,23 @@ import pfa.redouaneachak.securescope.ui.screens.common.PlaceholderScreen
 import pfa.redouaneachak.securescope.ui.screens.datausage.DataUsageScreen
 import pfa.redouaneachak.securescope.ui.screens.hardware.HardwareScreen
 import pfa.redouaneachak.securescope.ui.screens.home.HomeScreen
+import pfa.redouaneachak.securescope.ui.screens.networkscan.NetworkScanScreen
 import pfa.redouaneachak.securescope.ui.screens.recentapps.RecentAppsScreen
 import pfa.redouaneachak.securescope.ui.screens.scan.ScanScreen
 
 @Composable
 fun SecureScopeNavGraph(
     navController: NavHostController = rememberNavController(),
-    onOpenMenu: () -> Unit
+    onOpenMenu: () -> Unit,
+    pendingDestination: String? = null,
+    onDestinationConsumed: () -> Unit = {}
 ) {
+    LaunchedEffect(pendingDestination) {
+        if (pendingDestination == "network_scan") {
+            navController.navigate(Screen.NetworkScan.route)
+            onDestinationConsumed()
+        }
+    }
     NavHost(navController = navController, startDestination = Screen.Home.route) {
 
         composable(Screen.Home.route) {
@@ -61,7 +71,9 @@ fun SecureScopeNavGraph(
                 onAppClick = { pkg -> navController.navigate(Screen.AppDetail.createRoute(pkg)) }
             )
         }
-        composable(Screen.NetworkScan.route) { PlaceholderScreen("Scan Network") { navController.popBackStack() } }
+        composable(Screen.NetworkScan.route) {
+            NetworkScanScreen(onBack = { navController.popBackStack() })
+        }
         composable(Screen.Guide.route) { PlaceholderScreen("App Guide") { navController.popBackStack() } }
         composable(Screen.UserAgreement.route) { PlaceholderScreen("User Agreement") { navController.popBackStack() } }
 

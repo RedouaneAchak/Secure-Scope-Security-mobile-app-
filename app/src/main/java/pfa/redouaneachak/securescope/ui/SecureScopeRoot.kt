@@ -13,7 +13,10 @@ import pfa.redouaneachak.securescope.ui.navigation.SecureScopeNavGraph
 import pfa.redouaneachak.securescope.ui.screens.settings.SettingsScreen
 
 @Composable
-fun SecureScopeRoot() {
+fun SecureScopeRoot(
+    pendingDestination: String? = null,
+    onDestinationConsumed: () -> Unit = {}
+) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -29,7 +32,9 @@ fun SecureScopeRoot() {
         }
     ) {
         SecureScopeNavGraph(
-            onOpenMenu = { scope.launch { drawerState.open() } }
+            onOpenMenu = { scope.launch { drawerState.open() } },
+            pendingDestination = pendingDestination,
+            onDestinationConsumed = onDestinationConsumed
         )
     }
 }

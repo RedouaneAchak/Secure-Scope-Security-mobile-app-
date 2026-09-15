@@ -1,0 +1,7 @@
+# category,domain
+adult,pornhub.com
+adult,xvideos.com
+adult,xnxx.com
+gambling,bet365.com
+gambling,pokerstars.com
+gambling,888casino.com

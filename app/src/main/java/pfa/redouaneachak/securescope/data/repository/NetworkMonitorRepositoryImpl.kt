@@ -9,14 +9,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import pfa.redouaneachak.securescope.data.local.BlockStatsHolder
+import pfa.redouaneachak.securescope.data.local.VpnStateHolder
 import pfa.redouaneachak.securescope.data.local.dao.NetworkSessionDao
 import pfa.redouaneachak.securescope.data.local.entity.NetworkSessionEntity
 import pfa.redouaneachak.securescope.data.model.AppDataUsage
 import pfa.redouaneachak.securescope.data.model.NetworkSession
+import pfa.redouaneachak.securescope.data.model.NetworkSessionWithApp
+import pfa.redouaneachak.securescope.data.model.BlockedDomain
 import javax.inject.Inject
 
 class NetworkMonitorRepositoryImpl @Inject constructor(
     private val networkSessionDao: NetworkSessionDao,
+    private val appRepository: AppRepository,
+    private val vpnStateHolder: VpnStateHolder,
+    private val blockStatsHolder: BlockStatsHolder,
     @ApplicationContext private val context: Context
 ) : NetworkMonitorRepository {
 
@@ -38,6 +45,13 @@ class NetworkMonitorRepositoryImpl @Inject constructor(
                 timestamp = session.timestamp
             )
         )
+    }
+
+    override suspend fun recordSessionIfNew(session: NetworkSession, packageName: String) {
+        val exists = networkSessionDao.sessionExists(packageName, session.remoteAddress)
+        if (!exists) {
+            recordSession(session, packageName)
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -68,17 +82,26 @@ class NetworkMonitorRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun isPrivateDnsActive(): Boolean {
-        val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val linkProperties = connectivityManager.getLinkProperties(activeNetwork) ?: return false
-        return linkProperties.isPrivateDnsActive
+    override fun isVpnActive(): Flow<Boolean> = vpnStateHolder.isActive
+
+    override fun observeBlockedDomains(): Flow<List<BlockedDomain>> = blockStatsHolder.blockedDomains
+
+    override fun observeRecentSessions(limit: Int): Flow<List<NetworkSessionWithApp>> {
+        return networkSessionDao.getRecentSessions(limit).map { entities ->
+            entities.map { entity ->
+                val appName = appRepository.getAppByPackageName(entity.packageName)?.appName ?: entity.packageName
+                NetworkSessionWithApp(
+                    packageName = entity.packageName,
+                    appName = appName,
+                    remoteAddress = entity.remoteAddress,
+                    timestamp = entity.timestamp,
+                    isSuspicious = false
+                )
+            }
+        }
     }
 
     private fun NetworkSessionEntity.toDomainModel(): NetworkSession {
-        return NetworkSession(
-            remoteAddress = remoteAddress,
-            timestamp = timestamp
-        )
+        return NetworkSession(remoteAddress = remoteAddress, timestamp = timestamp)
     }
 }

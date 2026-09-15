@@ -1,5 +1,6 @@
 package pfa.redouaneachak.securescope
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,9 +19,13 @@ import pfa.redouaneachak.securescope.ui.screens.splash.SplashScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private var pendingDestination by mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        pendingDestination = intent?.getStringExtra(EXTRA_DESTINATION)
 
         setContent {
             SecureScopeTheme {
@@ -30,10 +35,23 @@ class MainActivity : ComponentActivity() {
                     if (showSplash) {
                         SplashScreen(onFinished = { showSplash = false })
                     } else {
-                        SecureScopeRoot()
+                        SecureScopeRoot(
+                            pendingDestination = pendingDestination,
+                            onDestinationConsumed = { pendingDestination = null }
+                        )
                     }
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        pendingDestination = intent.getStringExtra(EXTRA_DESTINATION)
+    }
+
+    companion object {
+        const val EXTRA_DESTINATION = "destination"
     }
 }
