@@ -58,8 +58,21 @@ fun NetworkScanScreen(onBack: () -> Unit, viewModel: NetworkScanViewModel = hilt
             context.startService(Intent(context, NetworkVpnService::class.java))
         }
     }
+    val batteryOptimizationLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { /* result not critical — best-effort */ }
 
+    fun requestBatteryOptimizationExemption() {
+        val powerManager = context.getSystemService(android.os.PowerManager::class.java)
+        if (!powerManager.isIgnoringBatteryOptimizations(context.packageName)) {
+            val intent = Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = android.net.Uri.parse("package:${context.packageName}")
+            }
+            batteryOptimizationLauncher.launch(intent)
+        }
+    }
     fun stopProtection() {
+        requestBatteryOptimizationExemption()
         val stopIntent = Intent(context, NetworkVpnService::class.java).apply {
             action = NetworkVpnService.ACTION_STOP
         }

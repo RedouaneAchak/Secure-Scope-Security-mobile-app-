@@ -5,3 +5,4 @@ adult,xnxx.com
 gambling,bet365.com
 gambling,pokerstars.com
 gambling,888casino.com
+other,edu.mines-rabat.ma

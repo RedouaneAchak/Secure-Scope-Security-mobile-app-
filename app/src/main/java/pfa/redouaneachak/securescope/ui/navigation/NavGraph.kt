@@ -17,6 +17,7 @@ import pfa.redouaneachak.securescope.ui.screens.home.HomeScreen
 import pfa.redouaneachak.securescope.ui.screens.networkscan.NetworkScanScreen
 import pfa.redouaneachak.securescope.ui.screens.recentapps.RecentAppsScreen
 import pfa.redouaneachak.securescope.ui.screens.scan.ScanScreen
+import pfa.redouaneachak.securescope.ui.screens.serverlist.ServerListScreen
 
 @Composable
 fun SecureScopeNavGraph(
@@ -81,7 +82,16 @@ fun SecureScopeNavGraph(
             route = Screen.AppDetail.route,
             arguments = listOf(navArgument("packageName") { type = NavType.StringType })
         ) {
-            AppDetailScreen(onBack = { navController.popBackStack() })
+            AppDetailScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToServerList = { pkg -> navController.navigate(Screen.ServerList.createRoute(pkg)) }
+            )
+        }
+        composable(
+            route = Screen.ServerList.route,
+            arguments = listOf(navArgument("packageName") { type = NavType.StringType })
+        ) {
+            ServerListScreen(onBack = { navController.popBackStack() })
         }
     }
 }

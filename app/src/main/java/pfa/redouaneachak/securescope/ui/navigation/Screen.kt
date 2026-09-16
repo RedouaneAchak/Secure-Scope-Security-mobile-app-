@@ -5,6 +5,9 @@ sealed class Screen(val route: String) {
     object AppList : Screen("app_list")
     object Scan : Screen("scan")
     object NetworkScan : Screen("network_scan")
+    object ServerList : Screen("server_list/{packageName}") {
+        fun createRoute(packageName: String) = "server_list/$packageName"
+    }
     object DataUsage : Screen("data_usage")
     object Hardware : Screen("hardware")
     object RecentApps : Screen("recent_apps")
