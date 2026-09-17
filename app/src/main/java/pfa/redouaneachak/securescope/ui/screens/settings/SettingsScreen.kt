@@ -33,13 +33,6 @@ fun SettingsScreen(
 
         Column(verticalArrangement = Arrangement.spacedBy(28.dp)) {
 
-
-            SettingsToggleRow(
-                label = "Dark mode",
-                checked = theme == AppTheme.DARK,
-                onCheckedChange = { isDark -> viewModel.setTheme(if (isDark) AppTheme.DARK else AppTheme.LIGHT) }
-            )
-
             SettingsActionRow(Icons.Filled.Share, "Share") {
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"

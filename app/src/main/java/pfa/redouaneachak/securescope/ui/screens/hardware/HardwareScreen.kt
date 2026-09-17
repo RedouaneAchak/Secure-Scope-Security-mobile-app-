@@ -65,6 +65,7 @@ fun HardwareScreen(onBack: () -> Unit, viewModel: HardwareViewModel = hiltViewMo
                     Spacer(modifier = Modifier.height(16.dp))
                 }
                 item {
+
                     if (breakdown == null) {
                         Box(modifier = Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
                             SecureScopeLoadingIndicator(label = "Analyzing storage...")

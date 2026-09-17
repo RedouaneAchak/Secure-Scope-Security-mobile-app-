@@ -212,7 +212,7 @@ private fun ContactedServersCard(servers: List<String>, onSeeMore: () -> Unit) {
 
             if (servers.isEmpty()) {
                 Text(
-                    "No servers detected yet. Run network protection to see contacted servers.",
+                    "No servers detected yet. Run network protection and use the application to see contacted servers.",
                     fontSize = 13.sp,
                     color = SecureScopeColors.Gray
                 )
@@ -294,16 +294,7 @@ private fun ActionButtons(onUninstall: () -> Unit, onForceStop: () -> Unit) {
         OutlinedButton(onClick = onForceStop, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Filled.Stop, contentDescription = null, modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(6.dp))
-            Text("Force Stop")
-        }
-        Button(
-            onClick = onUninstall,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = SecureScopeColors.DangerRed)
-        ) {
-            Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text("Uninstall")
+            Text("Take Action")
         }
     }
 }

@@ -41,6 +41,9 @@ import pfa.redouaneachak.securescope.ui.theme.SecureScopeColors
 import pfa.redouaneachak.securescope.util.TimeFormatUtil
 import androidx.compose.ui.graphics.drawscope.rotate
 import pfa.redouaneachak.securescope.ui.components.SecureScopeLoadingIndicator
+import android.view.WindowManager
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +53,16 @@ fun ScanScreen(
     viewModel: ScanViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
+    val view = LocalView.current
+    DisposableEffect(uiState.phase) {
+        val window = (view.context as? android.app.Activity)?.window
+        if (uiState.phase == ScanPhase.SCANNING) {
+            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        onDispose {
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->

@@ -6,5 +6,6 @@ import pfa.redouaneachak.securescope.data.model.StorageBreakdown
 
 interface HardwareMonitorRepository {
     fun observeHardwareStats(): Flow<HardwareStats>
+    fun hasStorageAccessPermission(): Boolean
     suspend fun getStorageBreakdown(): StorageBreakdown
 }

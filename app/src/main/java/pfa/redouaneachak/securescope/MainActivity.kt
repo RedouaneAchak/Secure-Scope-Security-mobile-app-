@@ -16,9 +16,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import pfa.redouaneachak.securescope.ui.SecureScopeRoot
 import pfa.redouaneachak.securescope.ui.theme.SecureScopeTheme
 import pfa.redouaneachak.securescope.ui.screens.splash.SplashScreen
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var onboardingStateHolder: pfa.redouaneachak.securescope.data.local.OnboardingStateHolder
 
     private var pendingDestination by mutableStateOf<String?>(null)
 

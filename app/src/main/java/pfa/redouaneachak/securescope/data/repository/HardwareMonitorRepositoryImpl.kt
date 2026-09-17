@@ -1,6 +1,7 @@
 package pfa.redouaneachak.securescope.data.repository
 
 import android.app.ActivityManager
+import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -58,43 +59,59 @@ class HardwareMonitorRepositoryImpl @Inject constructor(
             storageTotalGb = totalBytes / (1024f * 1024f * 1024f)
         )
     }
+    override fun hasStorageAccessPermission(): Boolean {
+        val appOpsManager = context.getSystemService(AppOpsManager::class.java)
+        val mode = appOpsManager.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            context.packageName
+        )
+        return mode == AppOpsManager.MODE_ALLOWED
+    }
+
     @Suppress("DEPRECATION")
     override suspend fun getStorageBreakdown(): StorageBreakdown = withContext(Dispatchers.IO) {
-        val storageStatsManager = context.getSystemService(StorageStatsManager::class.java)
-        val storageManager = context.getSystemService(StorageManager::class.java)
-        val uuid = StorageManager.UUID_DEFAULT
-
-        val externalStats = storageStatsManager.queryExternalStatsForUser(uuid, android.os.Process.myUserHandle())
-
-        val apps = context.packageManager.getInstalledApplications(0)
-        val appUsages = mutableListOf<AppStorageUsage>()
-        var appsTotalBytes = 0L
-
-        for (appInfo in apps) {
-            try {
-                val stats = storageStatsManager.queryStatsForUid(uuid, appInfo.uid)
-                val size = stats.appBytes + stats.dataBytes + stats.cacheBytes
-                appsTotalBytes += size
-                appUsages.add(
-                    AppStorageUsage(
-                        packageName = appInfo.packageName,
-                        appName = context.packageManager.getApplicationLabel(appInfo).toString(),
-                        bytes = size
-                    )
-                )
-            } catch (_: Exception) { }
+        if (!hasStorageAccessPermission()) {
+            return@withContext StorageBreakdown(categories = emptyList(), appUsages = emptyList())
         }
 
-        StorageBreakdown(
-            categories = listOf(
-                StorageCategoryUsage("Apps", appsTotalBytes),
-                StorageCategoryUsage("Images", externalStats.imageBytes),
-                StorageCategoryUsage("Audio", externalStats.audioBytes),
-                StorageCategoryUsage("Video", externalStats.videoBytes),
-                StorageCategoryUsage("Other", externalStats.totalBytes - externalStats.imageBytes - externalStats.audioBytes - externalStats.videoBytes)
-            ),
-            appUsages = appUsages.sortedByDescending { it.bytes }
-        )
+        try {
+            val storageStatsManager = context.getSystemService(StorageStatsManager::class.java)
+            val uuid = StorageManager.UUID_DEFAULT
+            val externalStats = storageStatsManager.queryExternalStatsForUser(uuid, android.os.Process.myUserHandle())
+
+            val apps = context.packageManager.getInstalledApplications(0)
+            val appUsages = mutableListOf<AppStorageUsage>()
+            var appsTotalBytes = 0L
+
+            for (appInfo in apps) {
+                try {
+                    val stats = storageStatsManager.queryStatsForUid(uuid, appInfo.uid)
+                    val size = stats.appBytes + stats.dataBytes + stats.cacheBytes
+                    appsTotalBytes += size
+                    appUsages.add(
+                        AppStorageUsage(
+                            packageName = appInfo.packageName,
+                            appName = context.packageManager.getApplicationLabel(appInfo).toString(),
+                            bytes = size
+                        )
+                    )
+                } catch (_: Exception) { }
+            }
+
+            StorageBreakdown(
+                categories = listOf(
+                    StorageCategoryUsage("Apps", appsTotalBytes),
+                    StorageCategoryUsage("Images", externalStats.imageBytes),
+                    StorageCategoryUsage("Audio", externalStats.audioBytes),
+                    StorageCategoryUsage("Video", externalStats.videoBytes),
+                    StorageCategoryUsage("Other", (externalStats.totalBytes - externalStats.imageBytes - externalStats.audioBytes - externalStats.videoBytes).coerceAtLeast(0L))
+                ),
+                appUsages = appUsages.sortedByDescending { it.bytes }
+            )
+        } catch (_: Exception) {
+            StorageBreakdown(categories = emptyList(), appUsages = emptyList())
+        }
     }
 
     private fun queryMediaStoreSize(uri: android.net.Uri): Long {

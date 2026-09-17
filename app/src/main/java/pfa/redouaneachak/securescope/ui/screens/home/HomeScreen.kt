@@ -138,7 +138,7 @@ private fun DataUsageBar(
             if (hasPermission) {
                 Column {
                     Text(
-                        text = "Today's Data Usage",
+                        text = "Last 24h Data Usage",
                         color = Color.White.copy(alpha = 0.85f),
                         fontSize = 11.sp
                     )
@@ -178,14 +178,6 @@ private fun DataUsageBar(
 }
 
 @Composable
-private fun UsageStat(icon: ImageVector, value: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(value, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-    }
-}
-@Composable
 private fun UsageStat(icon: ImageVector, label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
@@ -195,25 +187,6 @@ private fun UsageStat(icon: ImageVector, label: String, value: String) {
     }
 }
 
-@Composable
-private fun UsageStat(icon: ImageVector, label: String, value: String, align: Alignment.Horizontal, modifier: Modifier = Modifier) {
-    Column(horizontalAlignment = align, modifier = modifier) {
-        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(label, color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
-        Text(value, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-    }
-}
-
-@Composable
-private fun UsageStat(icon: ImageVector, label: String, value: String, align: Alignment.Horizontal) {
-    Column(horizontalAlignment = align) {
-        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(label, color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
-        Text(value, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-    }
-}
 
 @Composable
 private fun AppGridPreview(
@@ -294,7 +267,7 @@ private fun HomeActionGrid(
             ActionTile(Icons.Filled.Wifi, Color(0xFF22C55E), "Scan Network", "Tap to scan", Modifier.weight(1f), onScanNetwork)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            ActionTile(Icons.Filled.Memory, Color(0xFFF59E0B), "Hardware Monitoring", null, Modifier.weight(1f), onHardwareMonitoring)
+            ActionTile(Icons.Filled.Memory, Color(0xFFF59E0B), "Hardware Monitor", null, Modifier.weight(1f), onHardwareMonitoring)
             ActionTile(Icons.Filled.History, Color(0xFF14B8A6), "Recent Apps", null, Modifier.weight(1f), onRecentApps)
         }
     }
