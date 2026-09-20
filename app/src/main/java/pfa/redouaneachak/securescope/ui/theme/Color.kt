@@ -17,8 +17,6 @@ object SecureScopeColors {
     val LightGray = Color(0xFFF3F4F6)
     val White = Color(0xFFFFFFFF)
     val Black = Color(0xFF121212)
-
-    // Reserved exclusively for risk/danger indicators — never used decoratively
     val DangerRed = Color(0xFFEF4444)
     val WarningOrange = Color(0xFFF97316)
     val WarningAmber = Color(0xFFF59E0B)

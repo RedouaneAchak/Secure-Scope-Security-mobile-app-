@@ -35,9 +35,9 @@ fun SecureScopeNavGraph(
     val startDestination by startDestinationViewModel.startDestination.collectAsStateWithLifecycle()
 
     LaunchedEffect(pendingDestination) {
-        if (pendingDestination == "network_scan") {
-            navController.navigate(Screen.NetworkScan.route)
-            onDestinationConsumed()
+        when (pendingDestination) {
+            "network_scan" -> { navController.navigate(Screen.NetworkScan.route); onDestinationConsumed() }
+            "scan" -> { navController.navigate(Screen.Scan.route); onDestinationConsumed() }
         }
     }
     if (startDestination == null) {

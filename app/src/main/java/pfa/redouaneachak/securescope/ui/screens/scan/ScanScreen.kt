@@ -44,6 +44,13 @@ import pfa.redouaneachak.securescope.ui.components.SecureScopeLoadingIndicator
 import android.view.WindowManager
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalView
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +60,22 @@ fun ScanScreen(
     viewModel: ScanViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { /* granted or not, scanning still works — just may not show a notification */ }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val alreadyGranted = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (!alreadyGranted) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
     val view = LocalView.current
     DisposableEffect(uiState.phase) {
         val window = (view.context as? android.app.Activity)?.window
@@ -98,7 +121,10 @@ fun ScanScreen(
                 ScanPhase.SCANNING -> ScanningContent(
                     current = uiState.progressCurrent,
                     total = uiState.progressTotal,
-                    currentAppName = uiState.currentAppName
+                    currentAppName = uiState.currentAppName,
+                    isPaused = uiState.isPaused,
+                    onTogglePause = viewModel::togglePause,
+                    onCancel = viewModel::cancelScan
                 )
                 ScanPhase.RESULTS -> ResultsList(
                     results = uiState.results,
@@ -143,7 +169,7 @@ private fun IdleScanContent(onScan: () -> Unit) {
 }
 
 @Composable
-private fun ScanningContent(current: Int, total: Int, currentAppName: String) {
+private fun ScanningContent(current: Int, total: Int, currentAppName: String, isPaused: Boolean, onTogglePause: () -> Unit, onCancel: () -> Unit) {
     val transition = rememberInfiniteTransition(label = "scan_ring")
     val rotation by transition.animateFloat(
         initialValue = 0f, targetValue = 360f,
@@ -187,6 +213,18 @@ private fun ScanningContent(current: Int, total: Int, currentAppName: String) {
                 color = SecureScopeColors.Blue,
                 trackColor = SecureScopeColors.LightGray
             )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(onClick = onTogglePause) {
+                Text(if (isPaused) "Resume" else "Pause")
+            }
+            OutlinedButton(
+                onClick = onCancel,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = SecureScopeColors.DangerRed)
+            ) {
+                Text("Cancel")
+            }
         }
     }
 }
@@ -237,7 +275,7 @@ private fun ScanResultCard(
     Card(
         modifier = Modifier.fillMaxWidth().animateContentSize(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = SecureScopeColors.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(

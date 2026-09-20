@@ -126,7 +126,7 @@ private fun AppDetailContent(
 
 @Composable
 private fun InfoCard(app: AppInfo, installSource: String?) {
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = SecureScopeColors.White)) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text("App Info", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             InfoRow("Version", app.versionName)
@@ -154,7 +154,7 @@ private fun ScanCard(
     isScanning: Boolean,
     onScanNow: () -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = SecureScopeColors.White)) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text("Security Scan", fontWeight = FontWeight.Bold, fontSize = 14.sp)
@@ -205,7 +205,7 @@ private fun ScanCard(
 
 @Composable
 private fun ContactedServersCard(servers: List<String>, onSeeMore: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = SecureScopeColors.White)) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Contacted Servers (${servers.size})", fontWeight = FontWeight.Bold, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(8.dp))
@@ -236,7 +236,7 @@ private fun PermissionsCard(permissions: List<PermissionInfo>) {
     val dangerous = permissions.filter { it.isDangerous }
     val normal = permissions.filterNot { it.isDangerous }
 
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = SecureScopeColors.White)) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Permissions (${permissions.size})", fontWeight = FontWeight.Bold, fontSize = 14.sp)
 

@@ -9,6 +9,7 @@ data class ScanUiState(
     val progressCurrent: Int = 0,
     val progressTotal: Int = 0,
     val currentAppName: String = "",
+    val isPaused: Boolean = false,
     val results: List<ScanResult> = emptyList(),
     val expandedPackageName: String? = null
 )

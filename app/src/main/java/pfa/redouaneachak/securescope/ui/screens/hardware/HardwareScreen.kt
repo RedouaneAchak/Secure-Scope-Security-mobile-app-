@@ -85,7 +85,7 @@ fun HardwareScreen(onBack: () -> Unit, viewModel: HardwareViewModel = hiltViewMo
 
 @Composable
 private fun StatCard(icon: ImageVector, color: Color, title: String, usedLabel: String, totalLabel: String, progress: Float) {
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = SecureScopeColors.White)) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
@@ -116,7 +116,7 @@ private fun StorageBreakdownCard(
     val categoryColors = listOf(SecureScopeColors.Blue, SecureScopeColors.Green, SecureScopeColors.Gray, SecureScopeColors.WarningAmber, SecureScopeColors.LightGray)
     val total = breakdown.categories.sumOf { it.bytes }.coerceAtLeast(1)
 
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = SecureScopeColors.White)) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Storage Breakdown", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             Spacer(modifier = Modifier.height(12.dp))

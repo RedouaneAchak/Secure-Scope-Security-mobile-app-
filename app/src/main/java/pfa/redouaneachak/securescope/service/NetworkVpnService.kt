@@ -93,7 +93,7 @@ class NetworkVpnService : VpnService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        return NotificationCompat.Builder(this, SecureScopeApp.CHANNEL_ID)
+        return NotificationCompat.Builder(this, SecureScopeApp.NETWORK_CHANNEL_ID )
             .setContentTitle("Proxy is running")
             .setContentText("Secure Scope is protecting your network traffic")
             .setSmallIcon(R.drawable.ic_launcher_foreground)

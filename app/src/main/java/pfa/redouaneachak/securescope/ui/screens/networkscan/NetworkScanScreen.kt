@@ -26,6 +26,7 @@ import pfa.redouaneachak.securescope.data.model.NetworkSessionWithApp
 import pfa.redouaneachak.securescope.service.NetworkVpnService
 import pfa.redouaneachak.securescope.ui.theme.SecureScopeColors
 import pfa.redouaneachak.securescope.util.TimeFormatUtil
+import androidx.core.content.ContextCompat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,9 +49,13 @@ fun NetworkScanScreen(onBack: () -> Unit, viewModel: NetworkScanViewModel = hilt
 
     fun startProtection() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            val alreadyGranted = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (!alreadyGranted) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
-
         val consentIntent = VpnService.prepare(context)
         if (consentIntent != null) {
             vpnPermissionLauncher.launch(consentIntent)
@@ -142,7 +147,7 @@ private fun MonitorToggleCard(isActive: Boolean, blockedCount: Int, onToggle: ()
     Card(
         modifier = Modifier.fillMaxWidth().padding(16.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = SecureScopeColors.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
